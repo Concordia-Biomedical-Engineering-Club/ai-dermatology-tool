@@ -1,0 +1,8 @@
+# --- API Framework ---
+# The main web framework for building the API.
+fastapi==0.116.1
+
+# --- ASGI Server ---
+# The server that runs the FastAPI application.
+# [standard] includes performance extras like websockets and httptools.
+uvicorn[standard]==0.35.0
