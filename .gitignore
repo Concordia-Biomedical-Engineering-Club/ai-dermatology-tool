@@ -1,0 +1,68 @@
+# --- Python / Virtual Environments ---
+# The virtual environment folder. This is the most important one!
+venv/
+/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- IDE / Editor specific files ---
+# Visual Studio Code
+.vscode/
+# PyCharm
+.idea/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Atom
+.atom/
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# --- OS-specific files ---
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+# --- Dependency / Build artifacts ---
+# Node.js (for React frontend)
+node_modules/
+build/
+dist/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Environment variables ---
+# Never commit environment variables. Use a .env.example file instead.
+.env
+.env.*
+!.env.example
+
+# --- ML Model / Data files ---
+# Large data files and trained models should not be in Git.
+# Use Git LFS for models if necessary, or download them from cloud storage.
+*.h5
+*.keras
+*.tflite
+*.onnx
+*.pkl
+*.pth
+*.pt
+/data/
+# You can make exceptions if a specific model or data file IS small and necessary.
+# For example, if you decide to commit your tflite model:
+# !api/ml_models/model.tflite
+# But for now, it's better to ignore them by default.
+
+# --- Testing / Coverage reports ---
+.pytest_cache/
+coverage.xml
+htmlcov/
+.coverage
+
+# --- Log files ---
+*.log
