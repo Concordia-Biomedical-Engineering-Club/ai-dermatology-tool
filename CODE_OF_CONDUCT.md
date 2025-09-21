@@ -23,6 +23,6 @@ To achieve this, we agree to follow these simple principles:
 
 If you experience or witness behavior that does not align with these principles, or if you have any other concerns, we encourage you to address them.
 
-Please contact the project lead at `youssefjedidi2022 [at] gmail [dot] com`.
+Please report concerns by opening a "Code of Conduct Violation" issue using our GitHub issue template at [https://github.com/<OWNER>/<REPO>/issues/new?template=code-of-conduct-violation.md](https://github.com/<OWNER>/<REPO>/issues/new?template=code-of-conduct-violation.md).
 
 All reports will be handled with discretion and fairness. We are committed to ensuring that our community is a safe and positive space for all members.
