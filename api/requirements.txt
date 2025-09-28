@@ -6,3 +6,5 @@ fastapi==0.116.1
 # The server that runs the FastAPI application.
 # [standard] includes performance extras like websockets and httptools.
 uvicorn[standard]==0.35.0
+
+aiofiles==23.1.0
