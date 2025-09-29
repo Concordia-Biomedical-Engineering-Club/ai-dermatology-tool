@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 @dataclass
 class Config:
@@ -15,7 +16,13 @@ class Config:
 
     BONUS_HISTORY_NAME_MATCH: float = 1.0
     BONUS_SPECIFIC_KEYWORD: float = 4.0
-    
+
+    MODEL_PATH: str = ""
+    CLASS_NAMES_PATH: str = ""
+
     # ML Model Configuration
-    MODEL_PATH: str = "ml_models/quantized_dynamic_range_model.tflite"
-    CLASS_NAMES_PATH: str = "ml_models/class_names.txt"
+    def __post_init__(self):
+        # Get the API directory path
+        api_dir = Path(__file__).parent.parent
+        self.MODEL_PATH = str(api_dir / "ml_models" / "quantized_dynamic_range_model.tflite")
+        self.CLASS_NAMES_PATH = str(api_dir / "data" / "class_names.txt")
