@@ -55,7 +55,8 @@ yarn-error.log*
 /data/
 # You can make exceptions if a specific model or data file IS small and necessary.
 # For example, if you decide to commit your tflite model:
-# !api/ml_models/model.tflite
+!api/ml_models/quantized_dynamic_range_model.tflite
+!api/ml_models/class_names.txt
 # But for now, it's better to ignore them by default.
 
 # --- Testing / Coverage reports ---
@@ -63,6 +64,12 @@ yarn-error.log*
 coverage.xml
 htmlcov/
 .coverage
+
+# --- Development Tools ---
+# Development validation scripts and test data (contains sensitive medical images)
+dev-tools/data/
+dev-tools/*.py
+!dev-tools/README.md
 
 # --- Log files ---
 *.log

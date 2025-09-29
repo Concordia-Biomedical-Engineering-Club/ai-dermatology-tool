@@ -15,3 +15,7 @@ class Config:
 
     BONUS_HISTORY_NAME_MATCH: float = 1.0
     BONUS_SPECIFIC_KEYWORD: float = 4.0
+    
+    # ML Model Configuration
+    MODEL_PATH: str = "ml_models/quantized_dynamic_range_model.tflite"
+    CLASS_NAMES_PATH: str = "ml_models/class_names.txt"
