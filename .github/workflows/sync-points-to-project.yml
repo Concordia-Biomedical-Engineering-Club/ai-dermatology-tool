@@ -53,10 +53,11 @@ jobs:
                 }
               }`;
 
+            let project, estimateField;
             try {
               const projectData = await github.graphql(projectQuery, { org: organization, number: PROJECT_NUMBER });
-              const project = projectData.organization.projectV2;
-              const estimateField = project.fields.nodes.find(field => field.name === ESTIMATE_FIELD_NAME);
+              project = projectData.organization.projectV2;
+              estimateField = project.fields.nodes.find(field => field.name === ESTIMATE_FIELD_NAME);
 
               if (!estimateField) {
                 console.log(`Field "${ESTIMATE_FIELD_NAME}" not found in Project ${PROJECT_NUMBER}. Exiting.`);
