@@ -16,6 +16,12 @@ jobs:
         with:
           github-token: ${{ secrets.PROJECT_PAT }}
           script: |
+            // IMPORTANT: PROJECT_PAT must be a fine-grained Personal Access Token with:
+            // - Repository access: ai-dermatology-tool
+            // - Organization access: Concordia-Biomedical-Engineering-Club
+            // - Permissions: Issues (read/write), Projects (read/write)
+            // If using classic PAT, it needs 'repo', 'project' scopes for the org.
+
             // CONFIGURATION: You must update these three variables
             const PROJECT_NUMBER = 2; // Find this in your project's URL
             const ESTIMATE_FIELD_NAME = "Estimate"; // The exact name of your field
@@ -26,33 +32,17 @@ jobs:
             const organization = context.repo.owner;
 
             // --- Find the Project and the Estimate Field ---
-            const projectQuery = `
-              query($org: String!, $number: Int!) {
-                organization(login: $org){
-                  projectV2(number: $number) {
-                    id
-                    fields(first: 20) {
-                      nodes {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          name
-                        }
-                        ... on ProjectV2Field {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }`;
+            try {
+              const projectData = await github.graphql(projectQuery, { org: organization, number: PROJECT_NUMBER });
+              const project = projectData.organization.projectV2;
+              const estimateField = project.fields.nodes.find(field => field.name === ESTIMATE_FIELD_NAME);
 
-            const projectData = await github.graphql(projectQuery, { org: organization, number: PROJECT_NUMBER });
-            const project = projectData.organization.projectV2;
-            const estimateField = project.fields.nodes.find(field => field.name === ESTIMATE_FIELD_NAME);
-
-            if (!estimateField) {
-              console.log(`Field "${ESTIMATE_FIELD_NAME}" not found in Project ${PROJECT_NUMBER}. Exiting.`);
+              if (!estimateField) {
+                console.log(`Field "${ESTIMATE_FIELD_NAME}" not found in Project ${PROJECT_NUMBER}. Exiting.`);
+                return;
+              }
+            } catch (error) {
+              console.error(`Error querying project: ${error.message}`);
               return;
             }
 
@@ -71,9 +61,20 @@ jobs:
                     }
                   }
                 }
-              }`;            const itemData = await github.graphql(itemQuery, { issueUrl: issue.url });
+              }`;
 
-            console.log(`Queried for issue URL: ${issue.url}`);
+            // Use HTML URL instead of API URL for GraphQL
+            const htmlUrl = issue.html_url || issue.url.replace('api.github.com/repos', 'github.com');
+
+            let itemData;
+            try {
+              itemData = await github.graphql(itemQuery, { issueUrl: htmlUrl });
+            } catch (error) {
+              console.error(`Error querying issue project items: ${error.message}`);
+              return;
+            }
+
+            console.log(`Queried for issue HTML URL: ${htmlUrl}`);
             console.log(`Response:`, JSON.stringify(itemData, null, 2));
 
             // Check if the issue was found
@@ -124,11 +125,14 @@ jobs:
                 }
               }`;
 
-            await github.graphql(updateMutation, {
-              projectId: project.id,
-              itemId: projectItem.id,
-              fieldId: estimateField.id,
-              value: estimateValue
-            });
-
-            console.log(`Successfully updated Estimate for Issue #${issue.number} to ${estimateValue}.`);
+            try {
+              await github.graphql(updateMutation, {
+                projectId: project.id,
+                itemId: projectItem.id,
+                fieldId: estimateField.id,
+                value: estimateValue
+              });
+              console.log(`Successfully updated Estimate for Issue #${issue.number} to ${estimateValue}.`);
+            } catch (error) {
+              console.error(`Error updating project item: ${error.message}`);
+            }
