@@ -3,19 +3,12 @@ name: Sync Story Points to Project Estimate
 on:
   issues:
     types: [labeled, unlabeled, edited]
-  workflow_dispatch:  # Manual trigger for testing
+  workflow_dispatch: # Manual trigger for testing
     inputs:
       dry_run:
-        description: 'Dry run mode (logs only, no changes)'
+        description: "Dry run mode (logs only, no changes)"
         required: false
         default: false
-        type: boolean
-  workflow_dispatch:  # Manual trigger for testing
-    inputs:
-      dry_run:
-        description: 'Dry run mode (logs only, no changes)'
-        required: false
-        default: 'false'
         type: boolean
 
 permissions:
