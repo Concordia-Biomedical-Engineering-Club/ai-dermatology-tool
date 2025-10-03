@@ -90,14 +90,14 @@ jobs:
 
             // --- Update the project item's estimate field ---
             const updateMutation = `
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: Float!) {
                 updateProjectV2ItemFieldValue(
                   input: {
                     projectId: $projectId
                     itemId: $itemId
                     fieldId: $fieldId
                     value: { 
-                      text: $value
+                      number: $value
                     }
                   }
                 ) {
@@ -111,7 +111,7 @@ jobs:
               projectId: project.id,
               itemId: projectItem.id,
               fieldId: estimateField.id,
-              value: estimateValue.toString()
+              value: estimateValue
             });
 
             console.log(`Successfully updated Estimate for Issue #${issue.number} to ${estimateValue}.`);
