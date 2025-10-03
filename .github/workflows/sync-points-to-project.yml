@@ -58,7 +58,7 @@ jobs:
 
             // --- Find the current project item for the issue ---
             const itemQuery = `
-              query($projectId: ID!, $issueUrl: URI!) {
+              query($issueUrl: URI!) {
                 resource(url: $issueUrl) {
                   ... on Issue {
                     projectItems(first: 10, includeArchived: false) {
@@ -73,7 +73,7 @@ jobs:
                 }
               }`;
 
-            const itemData = await github.graphql(itemQuery, { projectId: project.id, issueUrl: issue.url });
+            const itemData = await github.graphql(itemQuery, { issueUrl: issue.url });
             const projectItem = itemData.resource.projectItems.nodes.find(item => item.project.id === project.id);
 
             if (!projectItem) {
