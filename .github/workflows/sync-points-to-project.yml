@@ -71,9 +71,10 @@ jobs:
                     }
                   }
                 }
-              }`;
+              }`;            const itemData = await github.graphql(itemQuery, { issueUrl: issue.url });
 
-            const itemData = await github.graphql(itemQuery, { issueUrl: issue.url });
+            console.log(`Queried for issue URL: ${issue.url}`);
+            console.log(`Response:`, JSON.stringify(itemData, null, 2));
 
             // Check if the issue was found
             if (!itemData.resource) {
@@ -83,9 +84,11 @@ jobs:
 
             // Check if the issue has any project items
             if (!itemData.resource.projectItems || itemData.resource.projectItems.nodes.length === 0) {
-              console.log(`Issue #${issue.number} is not in any projects. Exiting.`);
+              console.log(`Issue #${issue.number} is not in any projects. Please add it to Project ${PROJECT_NUMBER} first.`);
               return;
             }
+
+            console.log(`Found ${itemData.resource.projectItems.nodes.length} project item(s) for this issue`);
 
             // Find the project item for our specific project
             const projectItem = itemData.resource.projectItems.nodes.find(item => item.project.id === project.id);
