@@ -32,6 +32,27 @@ jobs:
             const organization = context.repo.owner;
 
             // --- Find the Project and the Estimate Field ---
+            const projectQuery = `
+              query($org: String!, $number: Int!) {
+                organization(login: $org){
+                  projectV2(number: $number) {
+                    id
+                    fields(first: 20) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                        }
+                        ... on ProjectV2Field {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
             try {
               const projectData = await github.graphql(projectQuery, { org: organization, number: PROJECT_NUMBER });
               const project = projectData.organization.projectV2;
