@@ -1,0 +1,117 @@
+name: Sync Story Points to Project Estimate
+
+on:
+  issues:
+    types: [labeled, unlabeled, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  sync-points:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Points to Project Estimate Field
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            // CONFIGURATION: You must update these three variables
+            const PROJECT_NUMBER = 2; // Find this in your project's URL
+            const ESTIMATE_FIELD_NAME = "Estimate"; // The exact name of your field
+
+            // Get the event payload
+            const payload = context.payload;
+            const issue = payload.issue;
+            const organization = context.repo.owner;
+
+            // --- Find the Project and the Estimate Field ---
+            const projectQuery = `
+              query($org: String!, $number: Int!) {
+                organization(login: $org){
+                  projectV2(number: $number) {
+                    id
+                    fields(first: 20) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                        }
+                        ... on ProjectV2Field {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
+            const projectData = await github.graphql(projectQuery, { org: organization, number: PROJECT_NUMBER });
+            const project = projectData.organization.projectV2;
+            const estimateField = project.fields.nodes.find(field => field.name === ESTIMATE_FIELD_NAME);
+
+            if (!estimateField) {
+              console.log(`Field "${ESTIMATE_FIELD_NAME}" not found in Project ${PROJECT_NUMBER}. Exiting.`);
+              return;
+            }
+
+            // --- Find the current project item for the issue ---
+            const itemQuery = `
+              query($projectId: ID!, $issueUrl: URI!) {
+                resource(url: $issueUrl) {
+                  ... on Issue {
+                    projectItems(first: 10, includeArchived: false) {
+                      nodes {
+                        id
+                        project {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
+            const itemData = await github.graphql(itemQuery, { projectId: project.id, issueUrl: issue.url });
+            const projectItem = itemData.resource.projectItems.nodes.find(item => item.project.id === project.id);
+
+            if (!projectItem) {
+              console.log(`Issue #${issue.number} is not in Project ${PROJECT_NUMBER}. Exiting.`);
+              return;
+            }
+
+            // --- Determine the new estimate value from labels ---
+            let estimateValue = 0; // Default to 0 if no points label
+            const pointsLabel = issue.labels.find(label => label.name.startsWith("Points: "));
+            if (pointsLabel) {
+              estimateValue = parseInt(pointsLabel.name.replace("Points: ", ""), 10);
+            }
+
+            // --- Update the project item's estimate field ---
+            const updateMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { 
+                      text: $value
+                    }
+                  }
+                ) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }`;
+
+            await github.graphql(updateMutation, {
+              projectId: project.id,
+              itemId: projectItem.id,
+              fieldId: estimateField.id,
+              value: estimateValue.toString()
+            });
+
+            console.log(`Successfully updated Estimate for Issue #${issue.number} to ${estimateValue}.`);
