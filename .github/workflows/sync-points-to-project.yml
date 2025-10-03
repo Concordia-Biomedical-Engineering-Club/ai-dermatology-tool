@@ -3,6 +3,20 @@ name: Sync Story Points to Project Estimate
 on:
   issues:
     types: [labeled, unlabeled, edited]
+  workflow_dispatch:  # Manual trigger for testing
+    inputs:
+      dry_run:
+        description: 'Dry run mode (logs only, no changes)'
+        required: false
+        default: false
+        type: boolean
+  workflow_dispatch:  # Manual trigger for testing
+    inputs:
+      dry_run:
+        description: 'Dry run mode (logs only, no changes)'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   issues: write
@@ -21,6 +35,12 @@ jobs:
             // - Organization access: Concordia-Biomedical-Engineering-Club
             // - Permissions: Issues (read/write), Projects (read/write)
             // If using classic PAT, it needs 'repo', 'project' scopes for the org.
+
+            // Check if this is a dry run
+            const isDryRun = '${{ inputs.dry_run }}' === 'true';
+            if (isDryRun) {
+              console.log('🧪 DRY RUN MODE: No changes will be made to the project');
+            }
 
             // CONFIGURATION: You must update these three variables
             const PROJECT_NUMBER = 2; // Find this in your project's URL
@@ -146,6 +166,18 @@ jobs:
                   }
                 }
               }`;
+
+            // Dry run check before making changes
+            if (isDryRun) {
+              console.log('🧪 DRY RUN: Would update project item with:');
+              console.log(`   Project ID: ${project.id}`);
+              console.log(`   Item ID: ${projectItem.id}`);
+              console.log(`   Field ID: ${estimateField.id}`);
+              console.log(`   New Value: ${estimateValue}`);
+              console.log(`   Issue: #${issue.number}`);
+              console.log('🧪 DRY RUN: No actual changes made');
+              return;
+            }
 
             try {
               await github.graphql(updateMutation, {
