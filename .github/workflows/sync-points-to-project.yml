@@ -74,6 +74,20 @@ jobs:
               }`;
 
             const itemData = await github.graphql(itemQuery, { issueUrl: issue.url });
+
+            // Check if the issue was found
+            if (!itemData.resource) {
+              console.log(`Issue #${issue.number} not found. Exiting.`);
+              return;
+            }
+
+            // Check if the issue has any project items
+            if (!itemData.resource.projectItems || itemData.resource.projectItems.nodes.length === 0) {
+              console.log(`Issue #${issue.number} is not in any projects. Exiting.`);
+              return;
+            }
+
+            // Find the project item for our specific project
             const projectItem = itemData.resource.projectItems.nodes.find(item => item.project.id === project.id);
 
             if (!projectItem) {
